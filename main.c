@@ -69,7 +69,6 @@ void* enanito(void* arg){
     //Checar si hay una silla disponible
     sem_wait(&silla);
     sem_getvalue(&silla, &sillas_restantes);
-    printf("El valor del semáforo silla es: %d", sillas_restantes);
     printf("Enanito %d se ha sentado en la mesa\n", id);
 
     //Indica a blanca nieves que se ha sentado
@@ -80,7 +79,6 @@ void* enanito(void* arg){
     //Esperar a que blanca nieves sirva
     sem_wait(&turno);
     sem_getvalue(&turno, &mi_turno);
-    printf("El valor del semáforo turno es: %d", mi_turno);
     //Tiempo que tarda en comer
     printf("El enanito %d está comiendo\n", id);
     sleep(5);
@@ -93,21 +91,21 @@ void* enanito(void* arg){
 void* blanca_nieves(void* arg){
   while(1){
     if(esperando > 0){
-      printf("Blanca nieves ha regresado de su paseo\n");
       //Tiempo de preparación
-      printf("Blanca Nieves está preparando la comida\n");
-      sleep(2);
+      printf("Blanca Nieves está preparando la comida de un enanito más\n");
+      sleep(3);
       //Servirle a alguien
+      printf("Le he servido a un enanito. Ahora puede empezar a comer\n");
       sem_post(&turno);
       //Indicar que hay un enanito menos esperando
       pthread_mutex_lock(&mutex);
       esperando--;
-      printf("Le he servido a un enanito. Ahora puede empezar a comer\n");
       pthread_mutex_unlock(&mutex);
     }
     else{
       printf("No hay ningún enanito esperando. Me voy a ir a dar un paseo\n");
-      sleep(10);
+      sleep(8);
+      printf("Blanca nieves ha regresado de su paseo\n");
     }
   }
 }
