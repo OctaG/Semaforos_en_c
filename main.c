@@ -5,9 +5,26 @@
 
   Actividad 10 | Concurrencia
 
-  Ejercicio 1.
+  Ejercicio 1
 
+  Implementación en C de un programa que resuelve el siguiente problema
+  utilizando semáforos:
 
+  Blancanieves y los siete enanitos viven en una casa donde solo existen
+  cuatro sillas, que los enanitos utilizan para comer.
+
+  - Cuando un enanito vuelve de trabajar en la mina, comprueba si hay una
+    silla libre para sentarse.
+
+  - Si existe una silla libre, entonces indica a Blancanieves que ya está
+    sentado, y espera pacientemente su turno a que le sirvan.
+
+  - Cuando le ha servido, Blancanieves le indica que puede empezar a comer.
+
+  - El enanito come y cuando acaba, deja la silla libre y vuelve a la mina.
+
+  - Blancanieves, cuando no tiene ningún enanito pendiente de
+    servirle, se va a dar una vuelta.
 */
 
 #include <stdio.h>
@@ -41,13 +58,19 @@ int main(int argc, const char * argv[]){
   esperando = 0;
 
   result = pthread_create(&hilos[0], NULL, blanca_nieves, NULL);
+  if(result)
+    printf("Error al crear blanca_nieves");
 
   for(int i = 1; i <= ENANOS; ++i){
     result = pthread_create(&hilos[i], NULL, enanito, (void*) i);
+    if(result)
+      printf("Error al crear enanito");
   }
 
   for(int i = 0; i <= N_HILOS; ++i){
     result = pthread_join(hilos[i], NULL);
+    if(result)
+      printf("Error al adjuntar los threads");
   }
 
   sem_destroy(&silla);
@@ -58,17 +81,14 @@ int main(int argc, const char * argv[]){
 
 void* enanito(void* arg){
   int id = (int) arg;
-  int mi_turno;
-  int sillas_restantes;
   int rndm_t = (random() % 14)+3;
 
   while(1){
     //Se va a trabajar a la mina
     sleep(rndm_t);
-
+    printf("Enanito %d ha llegado de la mina\n", id);
     //Checar si hay una silla disponible
     sem_wait(&silla);
-    sem_getvalue(&silla, &sillas_restantes);
     printf("Enanito %d se ha sentado en la mesa\n", id);
 
     //Indica a blanca nieves que se ha sentado
@@ -78,7 +98,6 @@ void* enanito(void* arg){
     pthread_mutex_unlock(&mutex);
     //Esperar a que blanca nieves sirva
     sem_wait(&turno);
-    sem_getvalue(&turno, &mi_turno);
     //Tiempo que tarda en comer
     printf("El enanito %d está comiendo\n", id);
     sleep(5);
